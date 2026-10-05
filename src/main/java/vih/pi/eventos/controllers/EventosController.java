@@ -2,15 +2,17 @@ package vih.pi.eventos.controllers;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import jakarta.validation.Valid;
 import vih.pi.eventos.models.Convidado;
 import vih.pi.eventos.models.Evento;
 import vih.pi.eventos.repositories.ConvidadoRepository;
@@ -31,8 +33,12 @@ public class EventosController {
 	}
 	
 	@PostMapping
-	public String salvar(Evento evento) {
+	public String salvar(@Valid Evento evento, BindingResult result) {
 		
+		if(result.hasErrors()) {
+			return form(evento);
+		}
+	
 		System.out.println(evento);
 		er.save(evento);
 		
@@ -146,7 +152,7 @@ public class EventosController {
 	}
 	
 	@GetMapping("/{id}/remover")
-	public String apagarEvento(@PathVariable Long id) {
+	public String apagarEvento(@PathVariable Long id, RedirectAttributes attributes) {
 		
 		Optional<Evento> opt = er.findById(id);
 		
@@ -156,7 +162,6 @@ public class EventosController {
 			List<Convidado> convidados = cr.findByEvento(evento);
 			
 			cr.deleteAll(convidados);
-			
 			er.delete(evento);
 			
 		}
